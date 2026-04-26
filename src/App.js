@@ -1,132 +1,111 @@
-const { useState, useEffect } = React;
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import Navbar from './components/Navbar';
+import Login from './components/Login';
+import TaskList from './components/TaskList';
+import './App.css';
 
 class TaskManager {
-    constructor() { this.tasks = []; this.loading = false; this.error = null; }
-    
-    async fetchTasks() {
-        this.loading = true; this.error = null;
-        try {
-            const response = await fetch('https://jsonplaceholder.typicode.com/todos?_limit=5');
-            const data = await response.json();
-            this.tasks = data.map(task => ({
-                id: task.id, title: task.title, completed: task.completed,
-                priority: 'medium', dueDate: new Date().toISOString().split('T')[0]
-            }));
-        } catch (err) {
-            this.error = err.message;
-        } finally { this.loading = false; }
+  constructor() {
+    this.tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+  }
+
+  addTask(task) {
+    const newTask = {
+      id: Date.now(),
+      ...task,
+      completed: false,
+      createdAt: new Date().toISOString()
+    };
+    this.tasks.unshift(newTask);
+    this.saveToStorage();
+    return newTask;
+  }
+
+  deleteTask(id) {
+    this.tasks = this.tasks.filter(task => task.id !== id);
+    this.saveToStorage();
+  }
+
+  updateTask(id, updatedTask) {
+    const index = this.tasks.findIndex(task => task.id === id);
+    if (index !== -1) {
+      this.tasks[index] = { ...this.tasks[index], ...updatedTask };
+      this.saveToStorage();
+      return this.tasks[index];
     }
-    
-    addTask(title, priority, dueDate) {
-        this.tasks.unshift({ id: Date.now(), title, completed: false, priority, dueDate });
+  }
+
+  toggleComplete(id) {
+    const task = this.tasks.find(t => t.id === id);
+    if (task) {
+      task.completed = !task.completed;
+      this.saveToStorage();
     }
-    deleteTask(id) { this.tasks = this.tasks.filter(t => t.id !== id); }
-    toggleComplete(id) {
-        this.tasks = this.tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t);
-    }
-    updateTask(id, updates) {
-        this.tasks = this.tasks.map(t => t.id === id ? { ...t, ...updates } : t);
-    }
-    getTasks() { return this.tasks; }
-    isLoading() { return this.loading; }
-    getError() { return this.error; }
+  }
+
+  getTasks() {
+    return [...this.tasks];
+  }
+
+  saveToStorage() {
+    localStorage.setItem('tasks', JSON.stringify(this.tasks));
+  }
 }
 
 const taskManager = new TaskManager();
 
-// Dark Mode Hook
-function useDarkMode() {
-    const [darkMode, setDarkMode] = useState(false);
-    useEffect(() => {
-        const saved = localStorage.getItem('darkMode');
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        setDarkMode(saved === 'true' || (!saved && prefersDark));
-    }, []);
-    useEffect(() => {
-        document.body.className = darkMode ? 'dark' : 'light';
-        localStorage.setItem('darkMode', darkMode);
-    }, [darkMode]);
-    return [darkMode, setDarkMode];
-}
-
 function App() {
-    const [darkMode, setDarkMode] = useDarkMode();
-    const [tasks, setTasks] = useState([]);
-    const [filteredTasks, setFilteredTasks] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
-    const [showForm, setShowForm] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [externalTasks, setExternalTasks] = useState([]);
 
-    useEffect(() => {
-        loadTasks();
-        setFilteredTasks(taskManager.getTasks());
-    }, []);
+  useEffect(() => {
+    // Cek login status dari localStorage
+    const savedLogin = localStorage.getItem('isLoggedIn');
+    if (savedLogin === 'true') {
+      setIsLoggedIn(true);
+    }
+  }, []);
 
-    const loadTasks = async () => {
-        await taskManager.fetchTasks();
-        setTasks(taskManager.getTasks());
-        setFilteredTasks(taskManager.getTasks());
-        setLoading(taskManager.isLoading());
-        setError(taskManager.getError());
-    };
+  const handleLogin = (email, password) => {
+    // Simple login validation
+    if (email && password) {
+      localStorage.setItem('isLoggedIn', 'true');
+      setIsLoggedIn(true);
+      return true;
+    }
+    return false;
+  };
 
-    const handleAddTask = (newTask) => {
-        taskManager.addTask(newTask.title, newTask.priority, newTask.dueDate);
-        setTasks([...taskManager.getTasks()]);
-        setFilteredTasks([...taskManager.getTasks()]);
-    };
+  const handleLogout = () => {
+    localStorage.removeItem('isLoggedIn');
+    setIsLoggedIn(false);
+  };
 
-    const handleDeleteTask = (id) => {
-        taskManager.deleteTask(id);
-        setTasks([...taskManager.getTasks()]);
-        setFilteredTasks([...taskManager.getTasks()]);
-    };
-
-    const handleToggleComplete = (id) => {
-        taskManager.toggleComplete(id);
-        setTasks([...taskManager.getTasks()]);
-        setFilteredTasks([...taskManager.getTasks()]);
-    };
-
-    return (
-        <div className="min-h-screen p-4 transition-colors duration-300">
-            <Navbar 
-                onRefresh={loadTasks} 
-                showForm={showForm} 
-                onToggleForm={() => setShowForm(!showForm)}
-                darkMode={darkMode} 
-                toggleDarkMode={() => setDarkMode(!darkMode)}
-            />
-            
-            <div className="max-w-4xl mx-auto mt-8 space-y-6">
-                <TaskStats tasks={tasks} darkMode={darkMode} />
-                
-                <TaskSearchFilter 
-                    tasks={tasks} 
-                    setFilteredTasks={setFilteredTasks}
-                    darkMode={darkMode}
-                />
-                
-                {showForm && <TaskForm onAddTask={handleAddTask} darkMode={darkMode} />}
-                {loading && <LoadingSpinner />}
-                {error && (
-                    <div className={`glass p-6 text-center rounded-2xl ${darkMode ? 'text-red-300 bg-red-500/10' : 'text-red-100 bg-red-500/20'}`}>
-                        <p className="text-lg font-semibold">❌ {error}</p>
-                        <button onClick={loadTasks} className="mt-3 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-xl">
-                            Coba Lagi
-                        </button>
-                    </div>
-                )}
-                
-                <TaskList 
-                    tasks={filteredTasks}
-                    onDelete={handleDeleteTask}
-                    onToggleComplete={handleToggleComplete}
-                    darkMode={darkMode}
-                />
-            </div>
-        </div>
-    );
+  return (
+    <Router>
+      <div className="App">
+        <Navbar isLoggedIn={isLoggedIn} onLogout={handleLogout} />
+        
+        <Routes>
+          <Route 
+            path="/login" 
+            element={!isLoggedIn ? <Login onLogin={handleLogin} /> : <Navigate to="/" />} 
+          />
+          <Route 
+            path="/" 
+            element={isLoggedIn ? (
+              <TaskList 
+                taskManager={taskManager} 
+                externalTasks={externalTasks}
+                setExternalTasks={setExternalTasks}
+              />
+            ) : <Navigate to="/login" />} 
+          />
+        </Routes>
+      </div>
+    </Router>
+  );
 }
 
-ReactDOM.render(<App />, document.getElementById('root'));
+export default App;
