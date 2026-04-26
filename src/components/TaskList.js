@@ -48,7 +48,7 @@ const TaskList = ({ taskManager, externalTasks, setExternalTasks }) => {
     return (
       <div className="container">
         <div className="loading">
-          <div>⏳ Memuat data dari JSONPlaceholder API...</div>
+          <div>⏳ Memuat data </div>
         </div>
       </div>
     );
@@ -71,7 +71,7 @@ const TaskList = ({ taskManager, externalTasks, setExternalTasks }) => {
       <TaskForm onAddTask={handleAddTask} />
 
       <div className="tasks-section card">
-        <h3>📂 Tugas Lokal ({tasks.length})</h3>
+        <h3>📂 Tugas yang harus di selesaikan({tasks.length})</h3>
         {tasks.length === 0 ? (
           <p className="text-center text-gray-500">Belum ada tugas. Tambahkan tugas pertama!</p>
         ) : (
