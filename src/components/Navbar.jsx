@@ -11,7 +11,6 @@ const Navbar = ({ isLoggedIn, onLogout }) => {
   return (
     <nav className="navbar">
       <div className="nav-container">
-        <Link to="/" className="logo">Pengingat Tugas</Link>
         
         {isLoggedIn ? (
           <div className="nav-links">
