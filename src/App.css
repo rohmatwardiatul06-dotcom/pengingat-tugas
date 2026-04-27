@@ -207,25 +207,3 @@ body {
 .card {
   animation: fadeIn 0.6s ease-out;
 }
-
-.task-content {
-  flex: 1;
-}
-
-.task-item input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
-  cursor: pointer;
-  accent-color: #667eea;
-}
-
-@media (max-width: 768px) {
-  .task-item {
-    padding: 1rem;
-  }
-  
-  .task-item div:last-child {
-    width: 100%;
-    justify-content: flex-end;
-  }
-}
