@@ -6,7 +6,7 @@
 
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #3157ff 0%, #b367ff 100%);
   min-height: 100vh;
 }
 
@@ -16,7 +16,7 @@ body {
 
 /* Navbar */
 .navbar {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(174, 182, 255, 0.95);
   backdrop-filter: blur(10px);
   box-shadow: 0 2px 20px rgba(0,0,0,0.1);
   padding: 1rem 0;
