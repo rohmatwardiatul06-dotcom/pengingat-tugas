@@ -3,6 +3,7 @@ import { useState } from 'react';
 const TaskItem = ({ task, onDelete, onToggleComplete, onEdit, external = false }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(task.title);
+  const [editDescription, setEditDescription] = useState(task.description || '');
 
   const priorityColor = {
     low: '🟢',
@@ -19,14 +20,17 @@ const TaskItem = ({ task, onDelete, onToggleComplete, onEdit, external = false }
     }
   };
 
-  const handleEdit = () => {
-    if (isEditing && editTitle.trim()) {
-      onEdit(task.id, { title: editTitle });
-      setIsEditing(false);
-    } else {
-      setIsEditing(!isEditing);
-    }
-  };
+    const handleEdit = () => {
+  if (isEditing && editTitle.trim()) {
+    onEdit(task.id, { 
+      title: editTitle,
+      description: editDescription // TAMBAHAN
+    });
+    setIsEditing(false);
+  } else {
+    setIsEditing(!isEditing);
+  }
+};
 
   const dueDate = task.dueDate ? new Date(task.dueDate).toLocaleDateString('id-ID') : 'Tidak ada';
 
@@ -40,16 +44,22 @@ const TaskItem = ({ task, onDelete, onToggleComplete, onEdit, external = false }
       />
       
       <div className="task-content" style={{flex: 1}}>
-        {isEditing ? (
-          <input
-            type="text"
-            value={editTitle}
-            onChange={(e) => setEditTitle(e.target.value)}
-            onBlur={handleEdit}
-            autoFocus
-            style={{marginBottom: '0.5rem'}}
-          />
-        ) : (
+      {isEditing ? (
+        <>
+        <input
+      type="text"
+      value={editTitle}
+      onChange={(e) => setEditTitle(e.target.value)}
+      style={{marginBottom: '0.5rem'}}
+    />
+    {/* TAMBAHAN */}
+    <textarea
+      value={editDescription}
+      onChange={(e) => setEditDescription(e.target.value)}
+      rows="2"
+    />
+  </>
+) : (
           <h4 style={{ 
             textDecoration: task.completed ? 'line-through' : 'none',
             margin: 0,

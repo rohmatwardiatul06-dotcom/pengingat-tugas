@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react';
-import TaskForm from './TaskForm';
-import TaskItem from './TaskItem';
-import { fetchExternalTasks } from '../services/Api';
+import { useState, useEffect } from "react";
+import TaskForm from "./TaskForm";
+import TaskItem from "./TaskItem";
+import { fetchExternalTasks } from "../services/Api";
 
 const TaskList = ({ taskManager, externalTasks, setExternalTasks }) => {
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [refresh, setRefresh] = useState(false);
+  const [error, setError] = useState("");
 
   // Fetch external data on mount
   useEffect(() => {
@@ -15,7 +16,7 @@ const TaskList = ({ taskManager, externalTasks, setExternalTasks }) => {
         const data = await fetchExternalTasks();
         setExternalTasks(data);
       } catch (err) {
-        setError('Gagal memuat data eksternal: ' + err.message);
+        setError("Gagal memuat data eksternal: " + err.message);
       } finally {
         setLoading(false);
       }
@@ -26,23 +27,29 @@ const TaskList = ({ taskManager, externalTasks, setExternalTasks }) => {
 
   const handleAddTask = (taskData) => {
     taskManager.addTask(taskData);
-  };
-
-  const handleDeleteTask = (id) => {
-    if (window.confirm('Yakin ingin menghapus tugas ini?')) {
-      taskManager.deleteTask(id);
-    }
+    setRefresh(!refresh); // TAMBAHAN
   };
 
   const handleToggleComplete = (id) => {
     taskManager.toggleComplete(id);
+    setRefresh(!refresh); // TAMBAHAN
   };
 
   const handleEditTask = (id, updatedData) => {
     taskManager.updateTask(id, updatedData);
+    setRefresh(!refresh); // TAMBAHAN
+  };
+
+  const handleDeleteTask = (id) => {
+    if (window.confirm("Yakin ingin menghapus tugas ini?")) {
+      taskManager.deleteTask(id);
+      setRefresh(!refresh);
+    }
   };
 
   const tasks = taskManager.getTasks();
+  const activeTasks = tasks.filter((task) => !task.completed);
+  const completedTasks = tasks.filter((task) => task.completed);
 
   if (loading) {
     return (
@@ -58,24 +65,48 @@ const TaskList = ({ taskManager, externalTasks, setExternalTasks }) => {
     <div className="container">
       <div className="welcome-section">
         <h1>📋 Daftar Tugas Saya</h1>
-        <p>Tanggal: {new Date().toLocaleDateString('id-ID', { 
-          weekday: 'long', 
-          year: 'numeric', 
-          month: 'long', 
-          day: 'numeric' 
-        })}</p>
+        <p>
+          Tanggal:{" "}
+          {new Date().toLocaleDateString("id-ID", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })}
+        </p>
       </div>
 
       {error && <div className="error">{error}</div>}
 
       <TaskForm onAddTask={handleAddTask} />
 
+      {/* TAMBAHAN */}
       <div className="tasks-section card">
-        <h3>📂 Tugas yang harus di selesaikan({tasks.length})</h3>
-        {tasks.length === 0 ? (
-          <p className="text-center text-gray-500">Belum ada tugas. Tambahkan tugas pertama!</p>
+        <h3> Tugas yang belum selesai ({activeTasks.length})</h3>
+
+        {activeTasks.length === 0 ? (
+          <p className="text-center">Tidak ada tugas aktif</p>
         ) : (
-          tasks.map(task => (
+          activeTasks.map((task) => (
+            <TaskItem
+              key={task.id}
+              task={task}
+              onDelete={handleDeleteTask}
+              onToggleComplete={handleToggleComplete}
+              onEdit={handleEditTask}
+            />
+          ))
+        )}
+      </div>
+
+      {/* TAMBAHAN */}
+      <div className="tasks-section card">
+        <h3>Tugas yang sudah selesai({completedTasks.length})</h3>
+
+        {completedTasks.length === 0 ? (
+          <p className="text-center">Belum ada tugas selesai</p>
+        ) : (
+          completedTasks.map((task) => (
             <TaskItem
               key={task.id}
               task={task}
@@ -89,7 +120,7 @@ const TaskList = ({ taskManager, externalTasks, setExternalTasks }) => {
 
       <div className="external-tasks-section card">
         <h3>🌐 Data dari API Eksternal ({externalTasks.length})</h3>
-        {externalTasks.map(task => (
+        {externalTasks.map((task) => (
           <TaskItem
             key={`ext-${task.id}`}
             task={task}
