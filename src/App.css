@@ -207,3 +207,7 @@ body {
 .card {
   animation: fadeIn 0.6s ease-out;
 }
+
+.task-item.completed h4 {
+  text-decoration: line-through;
+}

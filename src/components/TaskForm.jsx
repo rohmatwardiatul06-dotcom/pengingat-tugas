@@ -18,10 +18,10 @@ const TaskForm = ({ onAddTask }) => {
 
   return (
     <form onSubmit={handleSubmit} className="card">
-      <h3>➕ Tambah Tugas Baru</h3>
+      <h3> Tambah Tugas Baru</h3>
       
       <div className="form-group">
-        <label>Judul Tugas *</label>
+        <label>Judul Tugas </label>
         <input
           type="text"
           value={formData.title}
