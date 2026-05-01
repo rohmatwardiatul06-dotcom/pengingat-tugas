@@ -82,7 +82,7 @@ const TaskList = ({ taskManager, externalTasks, setExternalTasks }) => {
 
       {/* TAMBAHAN */}
       <div className="tasks-section card">
-        <h3> Tugas yang belum selesai ({activeTasks.length})</h3>
+        <h3> Tugas yang belum kerjakan ({activeTasks.length})</h3>
 
         {activeTasks.length === 0 ? (
           <p className="text-center">Tidak ada tugas aktif</p>
@@ -101,7 +101,7 @@ const TaskList = ({ taskManager, externalTasks, setExternalTasks }) => {
 
       {/* TAMBAHAN */}
       <div className="tasks-section card">
-        <h3>Tugas yang sudah selesai({completedTasks.length})</h3>
+        <h3>Tugas yang sudah dikerjakan({completedTasks.length})</h3>
 
         {completedTasks.length === 0 ? (
           <p className="text-center">Belum ada tugas selesai</p>

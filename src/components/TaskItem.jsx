@@ -86,7 +86,7 @@ const TaskItem = ({ task, onDelete, onToggleComplete, onEdit, external = false }
           {external && (
             <>
               {' • '}
-              <span style={{color: '#667eea'}}>🌐 Eksternal</span>
+              <span style={{color: '#8da0f3'}}>🌐 Eksternal</span>
             </>
           )}
         </div>
